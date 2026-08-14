@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.openmrs.module</groupId>
+    <artifactId>cflassist</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <name>CFL Assist Widget</name>
+    <description>Servlet filter that injects the cfl-assist floating chat widget into every CFL page.</description>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!--
+            The "release" flag (not source/target) so the compiler rejects APIs newer than Java 8
+            at build time - source/target alone only gate language syntax, not API availability,
+            which is exactly how a Java 10+ PrintWriter constructor slipped through and became a
+            runtime NoSuchMethodError against this container's Java 8 JVM.
+        -->
+        <maven.compiler.release>8</maven.compiler.release>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.1.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <!--
+            Compile-only: satisfies the ModuleActivator interface OpenMRS's module loader requires
+            in config.xml. At runtime the real jar already on the webapp's classpath is used
+            instead. This exact version was extracted from the running CFL container
+            (WEB-INF/lib/openmrs-api-2.4.6-cfl.3.jar) and installed into the local Maven repo,
+            since the -cfl.3 fork isn't published to any reachable Maven repository - see README.
+        -->
+        <dependency>
+            <groupId>org.openmrs.api</groupId>
+            <artifactId>openmrs-api</artifactId>
+            <version>2.4.6-cfl.3</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>${project.artifactId}-${project.version}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+            </plugin>
+            <plugin>
+                <!--
+                    An OMOD is just a jar with config.xml at its root. No OpenMRS-specific
+                    packaging/plugin is needed since this module has no Activator or API layer -
+                    the filter is registered declaratively from config.xml alone.
+                -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.4.1</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>

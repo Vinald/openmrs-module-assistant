@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<module configVersion="1.2">
+
+    <id>cflassist</id>
+    <name>CFL Assist Widget</name>
+    <version>1.0.0</version>
+    <package>org.openmrs.module.cflassist</package>
+    <author>Connect for Life</author>
+    <description>
+        Injects the cfl-assist floating chat widget script tag into every HTML page served by the
+        CFL distro (legacy JSP UI, uiframework/appui GSP pages, and the React OWA), by wrapping
+        every response through a single servlet filter rather than patching each rendering stack.
+    </description>
+
+    <require_version>2.4.6</require_version>
+
+    <activator>org.openmrs.module.cflassist.CflAssistActivator</activator>
+
+    <filter>
+        <filter-name>WidgetInjectionFilter</filter-name>
+        <filter-class>org.openmrs.module.cflassist.filter.WidgetInjectionFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>WidgetInjectionFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+</module>
