@@ -27,9 +27,25 @@ public class WidgetInjectionFilter implements Filter {
 
 	private static final String MARKER = "cflassist-widget";
 
+	private static final String DEFAULT_WIDGET_URL = "http://localhost:4000";
+
+	// Read once at class-load time rather than per-request: the env var comes from the
+	// container's environment (set via CFLASSIST_WIDGET_URL in the distro's .env /
+	// docker-compose.run.yml) and can't change without a container restart anyway, which
+	// already reloads this class.
+	private static final String WIDGET_URL = resolveWidgetUrl();
+
 	private static final String SCRIPT_TAG =
-		"<script src=\"http://localhost:4000/widget.js\" data-service-url=\"http://localhost:4000\" data-"
+		"<script src=\"" + WIDGET_URL + "/widget.js\" data-service-url=\"" + WIDGET_URL + "\" data-"
 			+ MARKER + "=\"1\"></script></body>";
+
+	private static String resolveWidgetUrl() {
+		String url = System.getenv("CFLASSIST_WIDGET_URL");
+		if (url == null || url.trim().isEmpty()) {
+			return DEFAULT_WIDGET_URL;
+		}
+		return url.trim().replaceAll("/+$", "");
+	}
 
 	// Extensions that are never HTML documents, so their requests skip buffering entirely.
 	// Without this, every static asset on a page (a single OWA load pulls in dozens - JS
