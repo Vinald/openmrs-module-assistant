@@ -78,6 +78,18 @@ public class WidgetInjectionFilter implements Filter {
 			}
 		}
 
+		// OWAs (React/Angular/etc bundles under /owa/) are pre-built static asset trees, not
+		// per-request dynamic HTML - buffering their index.html here proved unreliable under
+		// real browser concurrent load (intermittent malformed/503 responses that made Chrome
+		// silently abandon navigation, breaking every OWA-routed tile - Register Patient, Find
+		// Patient, etc). The widget script is baked directly into each OWA's packaged
+		// index.html instead (see openmrs-distro-cfl's web/owa/cfl.owa), so this filter doesn't
+		// need to touch OWA responses at all.
+		if (lowerUri.contains("/owa/")) {
+			chain.doFilter(request, response);
+			return;
+		}
+
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
 		BufferingResponseWrapper wrapper = new BufferingResponseWrapper(httpResponse);
 
