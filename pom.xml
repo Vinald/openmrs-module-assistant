@@ -27,6 +27,17 @@
         </developer>
     </developers>
 
+    <scm>
+        <url>https://github.com/Vinald/openmrs-module-assistant</url>
+        <connection>scm:git:https://github.com/Vinald/openmrs-module-assistant.git</connection>
+        <developerConnection>scm:git:https://github.com/Vinald/openmrs-module-assistant.git</developerConnection>
+    </scm>
+
+    <issueManagement>
+        <system>GitHub Issues</system>
+        <url>https://github.com/Vinald/openmrs-module-assistant/issues</url>
+    </issueManagement>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!--
