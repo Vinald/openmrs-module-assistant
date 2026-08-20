@@ -14,6 +14,46 @@ widget's `<script>` tag before `</body>`, skipping static assets by file extensi
 buffer large JS/CSS/font files (that was a real bug: buffering everything exhausted Tomcat's
 worker thread pool under real browser load).
 
+## Features
+
+- Injects the `cfl-assist` widget `<script>` tag into every dynamically-rendered HTML page
+  (legacy JSP UI and uiframework/appui GSP pages) with a single servlet filter, instead of
+  hand-editing each rendering stack.
+- Skips static assets (JS, CSS, images, fonts, etc., matched by file extension) and OWA routes
+  (`/owa/*`) so it never buffers large response bodies — avoids the Tomcat worker-thread
+  exhaustion that full-response buffering caused under real browser load.
+- Idempotent: checks for a `data-cflassist-widget` marker before inserting, so the script tag is
+  never injected twice into the same response.
+- Widget URL is configurable via the `CFLASSIST_WIDGET_URL` environment variable, falling back to
+  `http://localhost:4000` for local development.
+- No API/service layer, no database schema changes, no persisted data — the module is a single
+  stateless filter.
+
+## Requirements
+
+- Java 8 (the build uses `maven.compiler.release=8` to match the CFL distro's runtime JVM)
+- Apache Maven
+- OpenMRS platform `2.4.6` (or the CFL fork thereof) — declared via `require_version` in
+  `config.xml`
+- Docker, only if deploying into a local [CFL distro](../openmrs-distro-cfl) instance as described
+  below
+
+## Configuration
+
+| Variable               | Default                 | Purpose                                             |
+|-------------------------|--------------------------|------------------------------------------------------|
+| `CFLASSIST_WIDGET_URL`  | `http://localhost:4000` | Base URL the injected `<script src>`/`data-service-url` point at. Set this in the distro's `.env` / `docker-compose.run.yml` to point at a deployed `cfl-assist` widget instance. |
+
+## Project Structure
+
+```
+src/main/java/org/openmrs/module/cflassist/
+├── CflAssistActivator.java          # No-op ModuleActivator (required by OpenMRS's module loader)
+└── filter/
+    └── WidgetInjectionFilter.java   # Buffers HTML responses and injects the widget <script> tag
+src/main/resources/config.xml        # Module descriptor: id, version, activator, filter mapping
+```
+
 ## Build
 
 ```bash
