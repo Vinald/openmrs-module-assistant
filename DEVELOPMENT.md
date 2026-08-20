@@ -80,6 +80,13 @@ trying to fetch it. The minimal standalone pom above sidesteps that.
 If the CFL distro upgrades its OpenMRS platform version, re-extract the jar from the new container
 and update both this bootstrap step and the `<version>` in `pom.xml`.
 
+### No CI yet
+
+There's no GitHub Actions workflow in this repo. `mvn clean package` depends on the
+`openmrs-api:2.4.6-cfl.3` jar above, which isn't published on any public Maven repository
+(not even the plain `2.4.6`, which OpenMRS's own release train skipped) — a hosted CI runner has
+no way to fetch it. Revisit once that dependency has a public home.
+
 ## Verify
 
 `admin:Admin123` below is OpenMRS's standard local/demo administrator account, not a real
