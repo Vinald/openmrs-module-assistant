@@ -44,6 +44,11 @@ worker thread pool under real browser load).
 |-------------------------|--------------------------|------------------------------------------------------|
 | `CFLASSIST_WIDGET_URL`  | `http://localhost:4000` | Base URL the injected `<script src>`/`data-service-url` point at. Set this in the distro's `.env` / `docker-compose.run.yml` to point at a deployed `cfl-assist` widget instance. |
 
+The `CFLASSIST_WIDGET_URL` default, the injected script's marker attribute, and the list of
+static-asset file extensions the filter skips are not hardcoded in
+`WidgetInjectionFilter.java` — they're read from `src/main/resources/cflassist.properties`,
+bundled into the module jar. Change that file (not the filter class) to adjust any of them.
+
 ## Project Structure
 
 ```
@@ -52,6 +57,7 @@ src/main/java/org/openmrs/module/cflassist/
 └── filter/
     └── WidgetInjectionFilter.java   # Buffers HTML responses and injects the widget <script> tag
 src/main/resources/config.xml        # Module descriptor: id, version, activator, filter mapping
+src/main/resources/cflassist.properties  # Widget defaults, marker, static-asset suffixes
 ```
 
 ## Build
@@ -96,26 +102,6 @@ trying to fetch it. The minimal standalone pom above sidesteps that.
 
 If the CFL distro upgrades its OpenMRS platform version, re-extract the jar from the new
 container and update both this bootstrap step and the `<version>` in `pom.xml`.
-
-## Deploy into the distro
-
-```bash
-cp target/cflassist-1.0.0.omod ../openmrs-distro-cfl/cfl/web/cfl-modules/cflassist-1.0.0.omod
-cd ../openmrs-distro-cfl/cfl
-docker-compose -f docker-compose.build.yml -f docker-compose.run.yml \
-  -f docker-compose.debug.yml -f docker-compose.db.yml up --build -d
-```
-
-This rebuilds the `openmrscorecfl` image (baking the new omod into `/opt/cfl-modules`) and
-recreates the `cfl-web-1` container. Check `.env`'s `INITIAL_STARTUP` is `false` first, unless you
-actually intend a full re-initialization (fresh DB, ~30min+ OCL concept import) — see the distro's
-own README.
-
-**First deploy of a new module version needs a manual start**: OpenMRS persists
-`cflassist.started` as a global property and uses it to decide whether to auto-start the module on
-boot. If a build ever fails to start (check `Administration > Manage Modules` for a
-`[Not Started]` module or an "error starting the module" alert), fix the issue, redeploy, then
-manually click Start once from that page — after that it auto-starts on every future boot.
 
 ## Verify
 
