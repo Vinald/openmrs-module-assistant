@@ -1,6 +1,6 @@
 # Development Guide
 
-Implementation details, build steps, configuration, and verification for the assistant module.
+Technical reference for building, configuring, and verifying the assistant module.
 For a project overview, see [README.md](README.md).
 
 ## How It Works
@@ -10,11 +10,9 @@ filter, `WidgetInjectionFilter`, declaratively in `config.xml`, plus a no-op `Mo
 (required by OpenMRS's module loader).
 
 The filter covers the legacy JSP UI, the uiframework/appui GSP pages (e.g. the Home dashboard),
-and the React OWA in one place, instead of patching each rendering stack separately. It buffers
-each HTML response, checks the content type, and inserts the widget's `<script>` tag before
-`</body>`. It skips static assets by file extension so it never buffers large JS, CSS, or font
-files; buffering everything previously exhausted Tomcat's worker thread pool under real browser
-load.
+and the React OWA in one place. It buffers each HTML response, checks the content type, and
+inserts the widget's `<script>` tag before `</body>`. It skips static assets by file extension
+and OWA routes (`/owa/*`), so it never buffers large JS, CSS, font, or pre-built asset responses.
 
 ## Project Structure
 
@@ -50,9 +48,8 @@ Produces `target/assistant-1.0.0.omod`.
 ### One-time prerequisite: the `openmrs-api` dependency
 
 `pom.xml` compiles against `org.openmrs.api:openmrs-api:2.4.6-cfl.3` (needed only for the
-`ModuleActivator` interface). This exact CFL-forked version isn't published to Maven Central or
-any reachable OpenMRS Nexus repo, so a fresh machine needs to bootstrap it once from the running
-distro container:
+`ModuleActivator` interface), which isn't published to Maven Central or any reachable OpenMRS
+Nexus repo. Bootstrap it once from a running distro container:
 
 ```bash
 docker cp cfl-web-1:/usr/local/tomcat/webapps/openmrs/WEB-INF/lib/openmrs-api-2.4.6-cfl.3.jar /tmp/
@@ -72,22 +69,26 @@ mvn install:install-file -Dfile=/tmp/openmrs-api-2.4.6-cfl.3.jar \
   -DpomFile=/tmp/openmrs-api-minimal.pom.xml
 ```
 
-Use `-DpomFile` explicitly, not just `-Dfile` with groupId/artifactId/version flags. Otherwise
-Maven extracts the jar's own embedded `pom.xml`, which declares a parent POM
-(`org.openmrs:openmrs:pom:2.4.6-cfl.3`) that isn't resolvable anywhere either, and the build fails
-trying to fetch it. The minimal standalone pom above sidesteps that.
+Use `-DpomFile` (not `-Dfile` with groupId/artifactId/version flags): the jar's own embedded
+`pom.xml` declares an unresolvable parent POM.
 
 If the CFL distro upgrades its OpenMRS platform version, re-extract the jar from the new container
 and update both this bootstrap step and the `<version>` in `pom.xml`.
 
-## Verify
+## Test
 
-`admin:Admin123` below is OpenMRS's standard local/demo administrator account, not a real
-credential; it only applies to a fresh local distro instance.
+```bash
+mvn -q -B test
+```
+
+Runs the `WidgetInjectionFilter` unit test suite (`src/test/java`).
+
+## Verify
 
 ```bash
 curl -s -u admin:Admin123 "http://localhost/openmrs/ws/rest/v1/systemsetting?q=assistant&v=full"
 ```
 
-Look for `assistant.started = true`. Then load any CFL page in a browser and confirm the floating
-chat button appears bottom-right.
+`admin:Admin123` is OpenMRS's standard local/demo administrator account, valid only on a fresh
+local distro instance. Look for `assistant.started = true`. Then load any CFL page in a browser
+and confirm the floating chat button appears bottom-right.
