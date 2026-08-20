@@ -1,6 +1,6 @@
-# openmrs-module-cflassist
+# openmrs-module-assistant
 
-An OpenMRS module for the CFL distro that injects the `cfl-assist` floating chat widget into
+An OpenMRS module for the CFL distro that injects the assistant floating chat widget into
 every HTML page the platform serves, using a single servlet filter.
 
 ## Features
@@ -9,7 +9,7 @@ every HTML page the platform serves, using a single servlet filter.
   each rendering stack.
 - Skips static assets and OWA routes to avoid unnecessary response buffering.
 - Idempotent: never injects the widget twice into the same response.
-- Widget URL is configurable via the `CFLASSIST_WIDGET_URL` environment variable.
+- Widget URL is configurable via the `ASSISTANT_WIDGET_URL` environment variable.
 - No API layer and no database changes: a single stateless filter.
 
 ## Requirements
@@ -22,7 +22,7 @@ every HTML page the platform serves, using a single servlet filter.
 
 ```bash
 mvn -q -B clean package
-cp target/cflassist-1.0.0.jar target/cflassist-1.0.0.omod
+cp target/assistant-1.0.0.jar target/assistant-1.0.0.omod
 ```
 
 For implementation notes, the full build/bootstrap process, configuration options, and
