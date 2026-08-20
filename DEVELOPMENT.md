@@ -1,6 +1,6 @@
 # Development Guide
 
-Implementation details, build steps, configuration, and verification for the cflassist module.
+Implementation details, build steps, configuration, and verification for the assistant module.
 For a project overview, see [README.md](README.md).
 
 ## How It Works
@@ -19,33 +19,33 @@ load.
 ## Project Structure
 
 ```
-src/main/java/org/openmrs/module/cflassist/
-├── CflAssistActivator.java          # No-op ModuleActivator (required by OpenMRS's module loader)
+src/main/java/org/openmrs/module/assistant/
+├── AssistantActivator.java          # No-op ModuleActivator (required by OpenMRS's module loader)
 └── filter/
     └── WidgetInjectionFilter.java   # Buffers HTML responses and injects the widget <script> tag
 src/main/resources/config.xml            # Module descriptor: id, version, activator, filter mapping
-src/main/resources/cflassist.properties  # Widget defaults, marker, static-asset suffixes
+src/main/resources/assistant.properties  # Widget defaults, marker, static-asset suffixes
 ```
 
 ## Configuration
 
 | Variable               | Default                 | Purpose |
 |-------------------------|--------------------------|---------|
-| `CFLASSIST_WIDGET_URL`  | `http://localhost:4000` | Base URL the injected `<script src>` / `data-service-url` point at. Set this in the distro's `.env` / `docker-compose.run.yml` to point at a deployed `cfl-assist` widget instance. |
+| `ASSISTANT_WIDGET_URL`  | `http://localhost:4000` | Base URL the injected `<script src>` / `data-service-url` point at. Set this in the distro's `.env` / `docker-compose.run.yml` to point at a deployed assistant widget instance. |
 
-The `CFLASSIST_WIDGET_URL` default, the injected script's marker attribute, and the list of
-static-asset file extensions the filter skips are read from `src/main/resources/cflassist.properties`,
+The `ASSISTANT_WIDGET_URL` default, the injected script's marker attribute, and the list of
+static-asset file extensions the filter skips are read from `src/main/resources/assistant.properties`,
 bundled into the module jar. Edit that file, not the filter class, to adjust any of them.
 
 ## Build
 
 ```bash
-cd openmrs-module-cflassist
+cd openmrs-module-assistant
 mvn -q -B clean package
-cp target/cflassist-1.0.0.jar target/cflassist-1.0.0.omod
+cp target/assistant-1.0.0.jar target/assistant-1.0.0.omod
 ```
 
-Produces `target/cflassist-1.0.0.omod`.
+Produces `target/assistant-1.0.0.omod`.
 
 ### One-time prerequisite: the `openmrs-api` dependency
 
@@ -83,8 +83,8 @@ and update both this bootstrap step and the `<version>` in `pom.xml`.
 ## Verify
 
 ```bash
-curl -s -u admin:Admin123 "http://localhost/openmrs/ws/rest/v1/systemsetting?q=cflassist&v=full"
+curl -s -u admin:Admin123 "http://localhost/openmrs/ws/rest/v1/systemsetting?q=assistant&v=full"
 ```
 
-Look for `cflassist.started = true`. Then load any CFL page in a browser and confirm the floating
+Look for `assistant.started = true`. Then load any CFL page in a browser and confirm the floating
 chat button appears bottom-right.
