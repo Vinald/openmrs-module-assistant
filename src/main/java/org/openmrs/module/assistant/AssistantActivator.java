@@ -6,14 +6,14 @@
  *
  * Copyright (C) Okiror Samuel Vinald. All Rights Reserved.
  */
-package org.openmrs.module.cflassist;
+package org.openmrs.module.assistant;
 
 import org.openmrs.module.BaseModuleActivator;
 
 /**
  * No-op activator. The module's only behavior is the declaratively-registered
- * {@link org.openmrs.module.cflassist.filter.WidgetInjectionFilter} in config.xml - there is no
+ * {@link org.openmrs.module.assistant.filter.WidgetInjectionFilter} in config.xml - there is no
  * start/stop logic to run.
  */
-public class CflAssistActivator extends BaseModuleActivator {
+public class AssistantActivator extends BaseModuleActivator {
 }

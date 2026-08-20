@@ -6,7 +6,7 @@
  *
  * Copyright (C) Okiror Samuel Vinald. All Rights Reserved.
  */
-package org.openmrs.module.cflassist.filter;
+package org.openmrs.module.assistant.filter;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -30,14 +30,14 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
 /**
- * Injects the cfl-assist floating chat widget script tag into every HTML response, right before
+ * Injects the assistant floating chat widget script tag into every HTML response, right before
  * the closing &lt;/body&gt; tag. This covers the legacy JSP UI, the uiframework/appui GSP pages,
  * and the React OWA in one place, instead of patching each rendering stack separately.
  */
 public class WidgetInjectionFilter implements Filter {
 
 	// Defaults (widget marker, fallback URL, static asset suffixes) live in
-	// cflassist.properties rather than as literals here, so they can be tuned without touching
+	// assistant.properties rather than as literals here, so they can be tuned without touching
 	// this class.
 	private static final Properties CONFIG = loadConfig();
 
@@ -46,7 +46,7 @@ public class WidgetInjectionFilter implements Filter {
 	private static final String DEFAULT_WIDGET_URL = CONFIG.getProperty("widget.url.default");
 
 	// Read once at class-load time rather than per-request: the env var comes from the
-	// container's environment (set via CFLASSIST_WIDGET_URL in the distro's .env /
+	// container's environment (set via ASSISTANT_WIDGET_URL in the distro's .env /
 	// docker-compose.run.yml) and can't change without a container restart anyway, which
 	// already reloads this class.
 	private static final String WIDGET_URL = resolveWidgetUrl();
@@ -64,17 +64,17 @@ public class WidgetInjectionFilter implements Filter {
 
 	private static Properties loadConfig() {
 		Properties properties = new Properties();
-		try (InputStream in = WidgetInjectionFilter.class.getResourceAsStream("/cflassist.properties")) {
+		try (InputStream in = WidgetInjectionFilter.class.getResourceAsStream("/assistant.properties")) {
 			properties.load(in);
 		}
 		catch (IOException e) {
-			throw new UncheckedIOException("Failed to load cflassist.properties from the module jar", e);
+			throw new UncheckedIOException("Failed to load assistant.properties from the module jar", e);
 		}
 		return properties;
 	}
 
 	private static String resolveWidgetUrl() {
-		String url = System.getenv("CFLASSIST_WIDGET_URL");
+		String url = System.getenv("ASSISTANT_WIDGET_URL");
 		if (url == null || url.trim().isEmpty()) {
 			return DEFAULT_WIDGET_URL;
 		}
