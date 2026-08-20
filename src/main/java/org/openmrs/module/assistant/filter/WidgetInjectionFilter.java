@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UncheckedIOException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
@@ -65,12 +66,27 @@ public class WidgetInjectionFilter implements Filter {
 	private static Properties loadConfig() {
 		Properties properties = new Properties();
 		try (InputStream in = WidgetInjectionFilter.class.getResourceAsStream("/assistant.properties")) {
+			if (in == null) {
+				throw new IllegalStateException("assistant.properties not found on the classpath");
+			}
 			properties.load(in);
 		}
 		catch (IOException e) {
 			throw new UncheckedIOException("Failed to load assistant.properties from the module jar", e);
 		}
 		return properties;
+	}
+
+	private static Charset resolveCharset(String characterEncoding) {
+		if (characterEncoding != null) {
+			try {
+				return Charset.forName(characterEncoding);
+			}
+			catch (RuntimeException e) {
+				// unsupported/unrecognized name - fall through to the default below
+			}
+		}
+		return StandardCharsets.UTF_8;
 	}
 
 	private static String resolveWidgetUrl() {
@@ -129,12 +145,17 @@ public class WidgetInjectionFilter implements Filter {
 			return;
 		}
 
-		String html = new String(body, StandardCharsets.UTF_8);
-		if (!html.contains(MARKER) && html.contains("</body>")) {
-			html = html.replaceFirst("</body>", SCRIPT_TAG);
+		// Respect the response's actual charset rather than assuming UTF-8: the legacy JSP UI
+		// and GSP pages this filter buffers don't all declare (or default to) UTF-8, and
+		// decoding/re-encoding with the wrong charset corrupts any non-ASCII characters.
+		Charset charset = resolveCharset(wrapper.getCharacterEncoding());
+		String html = new String(body, charset);
+		int bodyCloseIndex = html.indexOf("</body>");
+		if (!html.contains(MARKER) && bodyCloseIndex != -1) {
+			html = html.substring(0, bodyCloseIndex) + SCRIPT_TAG + html.substring(bodyCloseIndex + "</body>".length());
 		}
 
-		byte[] out = html.getBytes(StandardCharsets.UTF_8);
+		byte[] out = html.getBytes(charset);
 		// Deliberately not calling setContentLength: a GZIPFilter earlier in the chain may
 		// compress this output before it reaches the client, in which case the on-wire length
 		// differs from out.length and an explicit header here would conflict with what the gzip
@@ -196,6 +217,17 @@ public class WidgetInjectionFilter implements Filter {
 		@Override
 		public PrintWriter getWriter() {
 			return writer;
+		}
+
+		@Override
+		public void setContentLength(int len) {
+			// no-op: injecting the widget script can change the body length after buffering
+			// completes, so a length set here (based on the pre-injection body) would go stale.
+		}
+
+		@Override
+		public void setContentLengthLong(long len) {
+			// no-op, see setContentLength
 		}
 
 		byte[] getBuffer() {
