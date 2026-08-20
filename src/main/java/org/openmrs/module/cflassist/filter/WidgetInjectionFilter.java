@@ -10,9 +10,12 @@ package org.openmrs.module.cflassist.filter;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Properties;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -33,9 +36,14 @@ import javax.servlet.http.HttpServletResponseWrapper;
  */
 public class WidgetInjectionFilter implements Filter {
 
-	private static final String MARKER = "cflassist-widget";
+	// Defaults (widget marker, fallback URL, static asset suffixes) live in
+	// cflassist.properties rather than as literals here, so they can be tuned without touching
+	// this class.
+	private static final Properties CONFIG = loadConfig();
 
-	private static final String DEFAULT_WIDGET_URL = "http://localhost:4000";
+	private static final String MARKER = CONFIG.getProperty("widget.marker");
+
+	private static final String DEFAULT_WIDGET_URL = CONFIG.getProperty("widget.url.default");
 
 	// Read once at class-load time rather than per-request: the env var comes from the
 	// container's environment (set via CFLASSIST_WIDGET_URL in the distro's .env /
@@ -47,6 +55,24 @@ public class WidgetInjectionFilter implements Filter {
 		"<script src=\"" + WIDGET_URL + "/widget.js\" data-service-url=\"" + WIDGET_URL + "\" data-"
 			+ MARKER + "=\"1\"></script></body>";
 
+	// Extensions that are never HTML documents, so their requests skip buffering entirely.
+	// Without this, every static asset on a page (a single OWA load pulls in dozens - JS
+	// chunks, CSS, fonts, icons) gets forced through in-memory buffering instead of Tomcat's
+	// normal fast static-file path, and under a real browser's parallel request load that
+	// exhausts the worker thread pool and produces intermittent 503s.
+	private static final String[] STATIC_ASSET_SUFFIXES = CONFIG.getProperty("static.asset.suffixes").split(",");
+
+	private static Properties loadConfig() {
+		Properties properties = new Properties();
+		try (InputStream in = WidgetInjectionFilter.class.getResourceAsStream("/cflassist.properties")) {
+			properties.load(in);
+		}
+		catch (IOException e) {
+			throw new UncheckedIOException("Failed to load cflassist.properties from the module jar", e);
+		}
+		return properties;
+	}
+
 	private static String resolveWidgetUrl() {
 		String url = System.getenv("CFLASSIST_WIDGET_URL");
 		if (url == null || url.trim().isEmpty()) {
@@ -54,14 +80,6 @@ public class WidgetInjectionFilter implements Filter {
 		}
 		return url.trim().replaceAll("/+$", "");
 	}
-
-	// Extensions that are never HTML documents, so their requests skip buffering entirely.
-	// Without this, every static asset on a page (a single OWA load pulls in dozens - JS
-	// chunks, CSS, fonts, icons) gets forced through in-memory buffering instead of Tomcat's
-	// normal fast static-file path, and under a real browser's parallel request load that
-	// exhausts the worker thread pool and produces intermittent 503s.
-	private static final String[] STATIC_ASSET_SUFFIXES = { ".js", ".css", ".map", ".json", ".ico", ".png", ".jpg",
-		".jpeg", ".gif", ".svg", ".webp", ".woff", ".woff2", ".ttf", ".eot", ".otf", ".pdf", ".zip", ".txt" };
 
 	@Override
 	public void init(FilterConfig filterConfig) {
