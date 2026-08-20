@@ -82,6 +82,9 @@ and update both this bootstrap step and the `<version>` in `pom.xml`.
 
 ## Verify
 
+`admin:Admin123` below is OpenMRS's standard local/demo administrator account, not a real
+credential; it only applies to a fresh local distro instance.
+
 ```bash
 curl -s -u admin:Admin123 "http://localhost/openmrs/ws/rest/v1/systemsetting?q=assistant&v=full"
 ```
