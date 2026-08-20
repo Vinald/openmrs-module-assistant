@@ -10,6 +10,7 @@ package org.openmrs.module.assistant.filter;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -61,6 +62,47 @@ class WidgetInjectionFilterTest {
 		filter.doFilter(request, response, chain);
 
 		assertArrayEquals(alreadyInjected.getBytes(StandardCharsets.UTF_8), captured.toByteArray());
+	}
+
+	@Test
+	void preservesNonUtf8ResponseCharset() throws Exception {
+		HttpServletRequest request = mockRequest("/openmrs/index.htm");
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		ByteArrayOutputStream captured = captureOutputStream(response);
+		when(response.getContentType()).thenReturn("text/html; charset=ISO-8859-1");
+		when(response.getCharacterEncoding()).thenReturn("ISO-8859-1");
+
+		String html = "<html><body>café</body></html>";
+		FilterChain chain = (req, res) -> {
+			res.setContentType("text/html; charset=ISO-8859-1");
+			byte[] bytes = html.getBytes("ISO-8859-1");
+			res.getOutputStream().write(bytes, 0, bytes.length);
+		};
+
+		filter.doFilter(request, response, chain);
+
+		String output = captured.toString("ISO-8859-1");
+		assertTrue(output.contains("café"), "expected non-ASCII text preserved in: " + output);
+		assertTrue(output.contains("data-assistant-widget=\"1\""));
+	}
+
+	@Test
+	void doesNotForwardStaleContentLength() throws Exception {
+		HttpServletRequest request = mockRequest("/openmrs/index.htm");
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		captureOutputStream(response);
+		when(response.getContentType()).thenReturn("text/html");
+
+		FilterChain chain = (req, res) -> {
+			res.setContentType("text/html");
+			res.setContentLength(5);
+			byte[] bytes = "<html><body>Hi</body></html>".getBytes(StandardCharsets.UTF_8);
+			res.getOutputStream().write(bytes, 0, bytes.length);
+		};
+
+		filter.doFilter(request, response, chain);
+
+		verify(response, never()).setContentLength(anyInt());
 	}
 
 	@Test
