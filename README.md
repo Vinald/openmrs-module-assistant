@@ -35,4 +35,4 @@ Okiror Samuel Vinald
 ## License
 
 Licensed under the [Mozilla Public License 2.0](LICENSE), the standard license used across
-OpenMRS projects, and subject to the OpenMRS Healthcare Disclaimer included in that file.
+OpenMRS projects, and subject to the [OpenMRS Healthcare Disclaimer](NOTICE).

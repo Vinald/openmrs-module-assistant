@@ -362,20 +362,3 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
 
     This Source Code Form is "Incompatible With Secondary Licenses", as
     defined by the Mozilla Public License, v. 2.0.
-
-OpenMRS Healthcare Disclaimer
-==============================
-
-This module is distributed as part of the OpenMRS ecosystem. Per the
-OpenMRS project's licensing convention (see https://openmrs.org/license/),
-Covered Software distributed under this License is also subject to the
-following disclaimer:
-
-    OpenMRS is a global collaborative project which is not warranted or
-    represented to be suitable or fit for any particular purpose,
-    including direct patient care. Any implementer or user of OpenMRS
-    agrees that they are solely responsible for testing and validating
-    both the software itself and its intended use case prior to
-    reliance on it, particularly with regard to its use in direct
-    patient care and any other use case where incorrect use or
-    malfunction of the software could lead to patient harm.
