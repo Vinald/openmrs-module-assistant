@@ -5,13 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.openmrs.module</groupId>
-    <artifactId>cflassist</artifactId>
+    <artifactId>assistant</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
-    <name>CFL Assist Widget</name>
-    <description>Servlet filter that injects the cfl-assist floating chat widget into every CFL page.</description>
-    <url>https://github.com/Vinald/openmrs-module-cflassist</url>
+    <name>Assistant Widget</name>
+    <description>Servlet filter that injects the assistant floating chat widget into every CFL page.</description>
+    <url>https://github.com/Vinald/openmrs-module-assistant</url>
 
     <licenses>
         <license>
