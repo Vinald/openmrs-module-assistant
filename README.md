@@ -85,3 +85,20 @@ curl -s -u admin:Admin123 "http://localhost/openmrs/ws/rest/v1/systemsetting?q=c
 
 Look for `cflassist.started = true`. Then load any CFL page in a browser and confirm the floating
 chat button appears bottom-right.
+
+## Author
+
+Okiror Samuel Vinald
+
+## License
+
+Licensed under the [Mozilla Public License 2.0](LICENSE), the standard license used across
+OpenMRS core and module repositories. Per [OpenMRS's licensing convention](http://openmrs.org/license/),
+distribution is also subject to the OpenMRS Healthcare Disclaimer reproduced in the `LICENSE` file:
+OpenMRS is a global collaborative project not warranted or represented to be suitable or fit for
+any particular purpose, including direct patient care, and implementers/users are solely
+responsible for testing and validating the software before relying on it.
+
+This module depends at compile time on `org.openmrs.api:openmrs-api`, which is itself part of the
+OpenMRS platform and licensed under the same terms; see the [OpenMRS](https://openmrs.org) project
+for details.

@@ -6,7 +6,7 @@
     <name>CFL Assist Widget</name>
     <version>1.0.0</version>
     <package>org.openmrs.module.cflassist</package>
-    <author>Connect for Life</author>
+    <author>Okiror Samuel Vinald</author>
     <description>
         Injects the cfl-assist floating chat widget script tag into every HTML page served by the
         CFL distro (legacy JSP UI, uiframework/appui GSP pages, and the React OWA), by wrapping
