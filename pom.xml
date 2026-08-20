@@ -11,6 +11,21 @@
 
     <name>CFL Assist Widget</name>
     <description>Servlet filter that injects the cfl-assist floating chat widget into every CFL page.</description>
+    <url>https://github.com/Vinald/openmrs-module-cflassist</url>
+
+    <licenses>
+        <license>
+            <name>Mozilla Public License 2.0 with Healthcare Disclaimer</name>
+            <url>http://openmrs.org/license/</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Okiror Samuel Vinald</name>
+            <id>okiror-samuel-vinald</id>
+        </developer>
+    </developers>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
